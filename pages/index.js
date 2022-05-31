@@ -1,43 +1,11 @@
-import Head from 'next/head'
-import { useState } from 'react'
-import cn from 'classnames'
-// import formatDate from 'date-fns/format'
 import useSWR, { mutate } from 'swr'
 import 'tailwindcss/tailwind.css'
-// import { listGuestbookEntries } from '@/lib/fauna'
 import { listFood } from '@/lib/fauna'
-import SuccessMessage from '@/components/SuccessMessage'
-import ErrorMessage from '@/components/ErrorMessage'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import Layout from '@/components/Layout'
+import FoodForm from '@/components/FoodForm'
+import FoodItem from '@/components/FoodItem'
 
-// const ENTRIES_PATH = '/api/entries'
 const FOOD_PATH = '/api/food'
-
-
-// const putEntry = (payload) =>
-//   fetch(ENTRIES_PATH, {
-//     method: 'POST',
-//     body: JSON.stringify(payload),
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//   }).then((res) => (res.ok ? res.json() : Promise.reject(res)))
-
-// const useEntriesFlow = ({ initialEntries }) => {
-//   const { data: entries } = useSWR(ENTRIES_PATH, {
-//     initialData: initialEntries,
-//   })
-
-//   const onSubmit = async (payload) => {
-//     await putEntry(payload)
-//     await mutate(ENTRIES_PATH)
-//   }
-
-//   return {
-//     entries,
-//     onSubmit,
-//   }
-// }
 
 const putFood = (payload) =>
   fetch(FOOD_PATH, {
@@ -49,7 +17,7 @@ const putFood = (payload) =>
   }).then((res) => (res.ok ? res.json() : Promise.reject(res)))
 
 const useFoodFlow = ({ initialFoodItems }) => {
-  const { data: foodItems } = useSWR(FOOD_PATH, {
+  const { data: foodItems } = useSWR(`${FOOD_PATH}/color?=red`, {
     initialData: initialFoodItems,
   })
 
@@ -64,297 +32,28 @@ const useFoodFlow = ({ initialFoodItems }) => {
   }
 }
 
-const AppHead = () => (
-  <Head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charSet="utf-8" />
-    <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.png" />
-  </Head>
-)
-
-// const EntryItem = ({ entry }) => (
-//   <div className="flex flex-col space-y-2">
-//     <div className="prose dark:prose-dark w-full">{entry.message}</div>
-//     <div className="flex items-center space-x-3">
-//       <p className="text-sm text-gray-500">{entry.name}</p>
-//       <span className="text-gray-200 dark:text-gray-800">/</span>
-//       <p className="text-sm text-gray-400 dark:text-gray-600">
-//         {formatDate(new Date(entry.createdAt), "d MMM yyyy 'at' h:mm bb")}
-//       </p>
-//     </div>
-//   </div>
-// )
-
-const FoodItem = ({ food }) => (
-  <div className="flex flex-col space-y-2">
-    <div className="prose dark:prose-dark w-full">{food.name}</div>
-    <div className="flex items-center space-x-3">
-      <p className="text-sm text-gray-500">{food.color}</p>
-      <span className="text-gray-200 dark:text-gray-800">/</span>
-      <p className="text-sm text-gray-400 dark:text-gray-600">
-        {food.photoUrl}
-      </p>
-    </div>
-  </div>
-)
-
-// const EntryForm = ({ onSubmit: onSubmitProp }) => {
-//   const initial = {
-//     name: '',
-//     message: '',
-//   }
-//   const [values, setValues] = useState(initial)
-//   const [formState, setFormState] = useState('initial')
-//   const isSubmitting = formState === 'submitting'
-
-//   const onSubmit = (ev) => {
-//     ev.preventDefault()
-
-//     setFormState('submitting')
-//     onSubmitProp(values)
-//       .then(() => {
-//         setValues(initial)
-//         setFormState('submitted')
-//       })
-//       .catch(() => {
-//         setFormState('failed')
-//       })
-//   }
-
-//   const makeOnChange =
-//     (fieldName) =>
-//     ({ target: { value } }) =>
-//       setValues({
-//         ...values,
-//         [fieldName]: value,
-//       })
-
-//   const inputClasses = cn(
-//     'block py-2 bg-white dark:bg-gray-800',
-//     'rounded-md border-gray-300 focus:ring-blue-500',
-//     'focus:border-blue-500 text-gray-900 dark:text-gray-100'
-//   )
-
-//   return (
-//     <>
-//       <form className="flex relative my-4" onSubmit={onSubmit}>
-//         <input
-//           required
-//           className={cn(inputClasses, 'w-1/3 mr-2 px-4')}
-//           aria-label="Your name"
-//           placeholder="Your name..."
-//           value={values.name}
-//           onChange={makeOnChange('name')}
-//         />
-//         <input
-//           required
-//           className={cn(inputClasses, 'pl-4 pr-32 flex-grow')}
-//           aria-label="Your message"
-//           placeholder="Your message..."
-//           value={values.message}
-//           onChange={makeOnChange('message')}
-//         />
-//         <button
-//           className={cn(
-//             'flex items-center justify-center',
-//             'absolute right-1 top-1 px-4 font-bold h-8',
-//             'bg-gray-100 dark:bg-gray-700 text-gray-900',
-//             'dark:text-gray-100 rounded w-28'
-//           )}
-//           type="submit"
-//           disabled={isSubmitting}
-//         >
-//           {isSubmitting ? <LoadingSpinner /> : 'Sign'}
-//         </button>
-//       </form>
-//       {{
-//         failed: () => <ErrorMessage>Something went wrong. :(</ErrorMessage>,
-
-//         submitted: () => (
-//           <SuccessMessage>Thanks for signing the guestbook.</SuccessMessage>
-//         ),
-//       }[formState]?.()}
-//     </>
-//   )
-// }
-
-const FoodForm = ({ onSubmit: onSubmitProp }) => {
-  const initial = {
-    name: '',
-    color: '',
-    photoUrl: '',
-  }
-  const [values, setValues] = useState(initial)
-  const [formState, setFormState] = useState('initial')
-  const isSubmitting = formState === 'submitting'
-
-  const onSubmit = (ev) => {
-    ev.preventDefault()
-
-    setFormState('submitting')
-    onSubmitProp(values)
-      .then(() => {
-        setValues(initial)
-        setFormState('submitted')
-      })
-      .catch(() => {
-        setFormState('failed')
-      })
-  }
-
-  const makeOnChange =
-    (fieldName) =>
-    ({ target: { value } }) =>
-      setValues({
-        ...values,
-        [fieldName]: value,
-      })
-
-  const inputClasses = cn(
-    'block py-2 bg-white dark:bg-gray-800',
-    'rounded-md border-gray-300 focus:ring-blue-500',
-    'focus:border-blue-500 text-gray-900 dark:text-gray-100'
-  )
-
-  return (
-    <>
-      <form className="flex relative my-4" onSubmit={onSubmit}>
-        <input
-          required
-          className={cn(inputClasses, 'w-1/3 mr-2 px-4')}
-          aria-label="Food Name"
-          placeholder="Food name..."
-          value={values.name}
-          onChange={makeOnChange('name')}
-        />
-        <input
-          required
-          className={cn(inputClasses, 'pl-4 pr-32 flex-grow')}
-          aria-label="Food Color"
-          placeholder="Food color..."
-          value={values.color}
-          onChange={makeOnChange('color')}
-        />
-        <input
-          required
-          className={cn(inputClasses, 'pl-4 pr-32 flex-grow')}
-          aria-label="Food Photo Url"
-          placeholder="Food photo URL..."
-          value={values.photoUrl}
-          onChange={makeOnChange('photoUrl')}
-        />
-        <button
-          className={cn(
-            'flex items-center justify-center',
-            'absolute right-1 top-1 px-4 font-bold h-8',
-            'bg-gray-100 dark:bg-gray-700 text-gray-900',
-            'dark:text-gray-100 rounded w-28'
-          )}
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? <LoadingSpinner /> : 'Add'}
-        </button>
-      </form>
-      {{
-        failed: () => <ErrorMessage>Something went wrong. :(</ErrorMessage>,
-
-        submitted: () => (
-          <SuccessMessage>Your food has been added.</SuccessMessage>
-        ),
-      }[formState]?.()}
-    </>
-  )
-}
-
-// const Guestbook = ({ initialEntries }) => {
-//   const { entries, onSubmit } = useEntriesFlow({
-//     initialEntries,
-//   })
-
-//   return (
-//     <main className="max-w-4xl mx-auto p-4">
-//       <AppHead />
-//       <div
-//         className={cn(
-//           'border border-blue-200 rounded p-6',
-//           'my-4 w-full dark:border-gray-800 bg-blue-50',
-//           'dark:bg-blue-opaque'
-//         )}
-//       >
-//         <h5
-//           className={cn(
-//             'text-lg md:text-xl font-bold',
-//             'text-gray-900 dark:text-gray-100'
-//           )}
-//         >
-//           Sign the Guestbook
-//         </h5>
-//         <p className="my-1 text-gray-800 dark:text-gray-200">
-//           Share a message for a future visitor.
-//         </p>
-//         <EntryForm onSubmit={onSubmit} />
-//       </div>
-//       <div className="mt-4 space-y-8 px-2">
-//         {entries?.map((entry) => (
-//           <EntryItem key={entry._id} entry={entry} />
-//         ))}
-//       </div>
-//     </main>
-//   )
-// }
-
 const FoodList = ({ initialFoodItems }) => {
   const { foodItems, onSubmit } = useFoodFlow({
     initialFoodItems,
   })
 
-  console.log({initialFoodItems, foodItems});
-
   return (
-    <main className="max-w-4xl mx-auto p-4">
-      <AppHead />
-      <div
-        className={cn(
-          'border border-blue-200 rounded p-6',
-          'my-4 w-full dark:border-gray-800 bg-blue-50',
-          'dark:bg-blue-opaque'
-        )}
-      >
-        <h5
-          className={cn(
-            'text-lg md:text-xl font-bold',
-            'text-gray-900 dark:text-gray-100'
-          )}
-        >
-          Add a Food
-        </h5>
-        <FoodForm onSubmit={onSubmit} />
-      </div>
-      <div className="mt-4 space-y-8 px-2">
+    <Layout pageTitle='Home'>    
+      <FoodForm onSubmit={onSubmit} />
+      <div className="mt-4 flex flex-wrap items-center justify-between">
         {foodItems?.map((food) => (
           <FoodItem key={food._id} food={food} />
         ))}
       </div>
-    </main>
+    </Layout>
   )
 }
 
-// export const getStaticProps = async () => ({
-//   props: {
-//     initialFood: await listGuestbookEntries(),
-//   },
-//   revalidate: 1,
-// })
-
-// export default Guestbook
-
 export const getStaticProps = async () => ({
   props: {
-    initialFoodItems: await listFood(),
+    initialFoodItems: await listFood('red'),
   },
   revalidate: 1,
 })
 
 export default FoodList
-
